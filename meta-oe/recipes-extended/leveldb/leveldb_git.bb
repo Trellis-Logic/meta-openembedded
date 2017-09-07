@@ -8,7 +8,9 @@ SRCREV = "a53934a3ae1244679f812d998a4f16f2c7f309a6"
 PV = "1.20+git${SRCPV}"
 
 SRC_URI = "git://github.com/google/${BPN}.git \
-"
+           file://0001-build_detect_platform-Check-for-__SSE4_2__.patch \
+           file://0002-makefile-build-SHARED_MEMENVLIB.patch \
+           "
 
 S = "${WORKDIR}/git"
 
@@ -17,7 +19,7 @@ inherit utils
 do_compile() {
     # do not use oe_runmake. oe_runmake pass to make compilation arguments and override
     # leveldb makefile variable CFLAGS and broke leveldb build.
-    CFLAGS="${CFLAGS}" make || die
+    CFLAGS="${CFLAGS}" make ${PARALLEL_MAKE}|| die
 }
 
 do_install() {
