@@ -4,6 +4,7 @@ LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d217a23f408e91c94359447735bc1800"
 DEPENDS = "dbus dbus-glib ncurses python libusb1 chrpath-replacement-native pps-tools"
 PROVIDES = "virtual/gpsd"
+PR = "r1"
 
 EXTRANATIVEPATH += "chrpath-native"
 
@@ -28,8 +29,9 @@ SRC_URI[sha256sum] = "504fc812f3c1525a1a48e04bf4d77f9a8066c201448d98089df89d58ef
 
 inherit scons update-rc.d python-dir pythonnative systemd bluetooth
 
-INITSCRIPT_NAME = "gpsd"
-INITSCRIPT_PARAMS = "defaults 35"
+INITSCRIPT_PACKAGES = "${PN}"
+INITSCRIPT_NAME_${PN} = "gpsd"
+INITSCRIPT_PARAMS_${PN} = "defaults 35"
 
 SYSTEMD_OESCONS = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false',d)}"
 
@@ -93,14 +95,6 @@ do_install_append() {
     install -m 0644 ${S}/systemd/${BPN}.socket ${D}${systemd_unitdir}/system/${BPN}.socket
 }
 
-pkg_postinst_${PN}-conf() {
-    update-alternatives --install ${sysconfdir}/default/gpsd gpsd-defaults ${sysconfdir}/default/gpsd.default 10
-}
-
-pkg_postrm_${PN}-conf() {
-    update-alternatives --remove gpsd-defaults ${sysconfdir}/default/gpsd.default
-}
-
 PACKAGES =+ "libgps libgpsd python-pygps-dbg python-pygps gpsd-udev gpsd-conf gpsd-gpsctl gps-utils"
 
 FILES_${PN}-dev += "${libdir}/pkgconfdir/libgpsd.pc ${libdir}/pkgconfdir/libgps.pc \
@@ -140,3 +134,10 @@ RPROVIDES_${PN} += "${PN}-systemd"
 RREPLACES_${PN} += "${PN}-systemd"
 RCONFLICTS_${PN} += "${PN}-systemd"
 SYSTEMD_SERVICE_${PN} = "${PN}.socket"
+
+inherit update-alternatives
+
+ALTERNATIVE_${PN} = "gpsd-defaults"
+ALTERNATIVE_PATH = "${sysconfdir}/default/gpsd.default"
+ALTERNATIVE_LINK = "${sysconfdir}/default/gpsd"
+ALTERNATIVE_TARGET = "${sysconfdir}/default/gpsd.default"
